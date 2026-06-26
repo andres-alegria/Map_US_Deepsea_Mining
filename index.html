@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>US deep-sea mineral application areas & ISA exploration areas</title>
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+  <!-- Fonts: Rowan (title) + Public Sans (everything else) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600&family=Rowan&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="header-text">
+        <h1 id="title"><!-- filled from CONFIG --></h1>
+        <p id="subtitle"><!-- filled from CONFIG --></p>
+      </div>
+      <img id="logo" class="logo" src="img/mongabay-logomark-white.svg" alt="Mongabay"
+           onerror="this.style.display='none'"/>
+    </div>
+  </header>
+
+  <div id="map"></div>
+
+  <!-- Layer-toggle + legend panel -->
+  <div class="panel">
+    <div class="toggles" id="toggles"><!-- built from CONFIG --></div>
+    <div class="legend-block">
+      <span class="legend-label" id="usLegendLabel">US application areas</span>
+      <div id="usLegend"><!-- built from CONFIG --></div>
+    </div>
+    <div class="legend-block">
+      <span class="legend-label">Seabed boundaries</span>
+      <div id="otherLegend"><!-- built from CONFIG --></div>
+    </div>
+  </div>
+
+  <div class="note" id="footnote"><!-- filled from CONFIG --></div>
+
+  <!-- Leaflet -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

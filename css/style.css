@@ -1,0 +1,182 @@
+/* ============================================================================
+   US DEEP-SEA MINERAL & ISA EXPLORATION AREAS MAP — STYLES
+   Most editorial values are driven by CSS variables set from CONFIG in app.js.
+   ========================================================================== */
+
+:root {
+  --header-bg:    #0b1f33;
+  --header-text:  #FCFCFC;
+  --title-size:   30px;
+  --subtitle-size:14px;
+  --body-size:    13px;
+  --logo-size:    34px;
+  --panel-bg:     rgba(255,255,255,0.94);
+  /* Fonts — matched to the US_Defense_Minerals template */
+  --font-title: "Rowan", Georgia, serif;                     /* title typeface */
+  --font-body:  "Public Sans", Helvetica, Arial, sans-serif; /* all other text */
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: var(--font-body);
+  color: #1a1a1a;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ---- HEADER ------------------------------------------------------------- */
+header {
+  background: var(--header-bg);
+  color: var(--header-text);
+  padding: 16px 22px;
+}
+.header-inner {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+.header-text { min-width: 0; }
+#title {
+  font-family: var(--font-title);
+  font-weight: 400;
+  font-size: var(--title-size);
+  line-height: 1.15;
+  margin: 0 0 4px 0;
+  letter-spacing: 0.2px;
+}
+#subtitle {
+  font-size: var(--subtitle-size);
+  font-weight: 400;
+  margin: 0;
+  opacity: 0.92;
+  max-width: 70ch;
+}
+.logo {
+  height: var(--logo-size);
+  width: auto;
+  flex: 0 0 auto;
+  /* Nudge down so the mark lines up with the cap height of the title text. */
+  margin-top: 3px;
+}
+
+/* ---- MAP ---------------------------------------------------------------- */
+#map {
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 420px;
+}
+
+/* ---- CONTROL / LEGEND PANEL -------------------------------------------- */
+.panel {
+  position: absolute;
+  /* Vertically centred on the map area for large displays. The small-screen
+     media query below overrides this back to a bottom-anchored layout. */
+  top: 50%;
+  transform: translateY(-50%);
+  right: 14px;
+  z-index: 1000;
+  background: var(--panel-bg);
+  backdrop-filter: blur(2px);
+  border-radius: 8px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.25);
+  padding: 12px 14px;
+  font-size: var(--body-size);
+  max-width: 250px;
+  line-height: 1.35;
+}
+.legend-label {
+  display: block;
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #44525e;
+  margin-bottom: 6px;
+}
+
+/* layer toggles */
+.toggles {
+  border-bottom: 1px solid #e2e6ea;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 3px 0;
+  user-select: none;
+}
+.toggle input { accent-color: #0b1f33; cursor: pointer; }
+.toggle .tlabel { font-weight: 600; }
+
+.legend-block { margin-bottom: 10px; }
+.legend-block:last-child { margin-bottom: 0; }
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 3px 0;
+}
+.legend-item .swatch {
+  width: 14px; height: 14px;
+  border-radius: 3px;
+  border: 1px solid rgba(0,0,0,0.25);
+  flex: 0 0 auto;
+}
+.legend-item .lineswatch {
+  width: 16px; height: 0;
+  flex: 0 0 auto;
+}
+
+/* ---- POPUP -------------------------------------------------------------- */
+.popup { font-size: var(--body-size); }
+.popup h3 {
+  font-family: var(--font-body);
+  font-size: 14px;
+  margin: 0 0 6px 0;
+  line-height: 1.25;
+}
+.popup .st {
+  display: inline-block;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+.popup table { border-collapse: collapse; width: 100%; }
+.popup td { padding: 2px 6px 2px 0; vertical-align: top; }
+.popup td.k { color: #667; font-weight: 600; white-space: nowrap; }
+
+/* ---- FOOTNOTE ----------------------------------------------------------- */
+.note {
+  font-size: 11px;
+  color: #555;
+  line-height: 1.4;
+  padding: 9px 22px 14px;
+  background: #f5f6f7;
+  border-top: 1px solid #e2e6ea;
+}
+.note a { color: #1d6fa5; }
+
+/* ---- RESPONSIVE --------------------------------------------------------- */
+@media (max-width: 640px) {
+  :root { --title-size: 21px; --subtitle-size: 12.5px; --logo-size: 26px; }
+  .panel { top: auto; transform: none; bottom: 60px; right: 8px; left: 8px; max-width: none; }
+  #subtitle { display: none; }
+}
