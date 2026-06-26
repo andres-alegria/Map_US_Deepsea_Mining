@@ -99,8 +99,7 @@ header {
   display: block;
   font-weight: 700;
   font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
+  letter-spacing: 0.4px;
   color: #44525e;
   margin-bottom: 6px;
 }
@@ -175,8 +174,18 @@ header {
 .note a { color: #1d6fa5; }
 
 /* ---- RESPONSIVE --------------------------------------------------------- */
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   :root { --title-size: 21px; --subtitle-size: 12.5px; --logo-size: 26px; }
-  .panel { top: auto; transform: none; bottom: 60px; right: 8px; left: 8px; max-width: none; }
+  /* On small screens, anchor the legend panel to the bottom of the screen
+     (overriding the desktop vertical-centering). !important guarantees these
+     beat the desktop .panel rule regardless of source order/specificity. */
+  .panel {
+    top: auto !important;
+    transform: none !important;
+    bottom: 16px;
+    right: 8px;
+    left: 8px;
+    max-width: none;
+  }
   #subtitle { display: none; }
 }
