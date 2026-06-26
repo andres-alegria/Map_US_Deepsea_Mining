@@ -205,6 +205,9 @@ const map = L.map("map", {
   maxBoundsViscosity: 0.9
 }).setView(CONFIG.center, CONFIG.zoom);
 
+// Minimalist scale bar (metric only, bottom-left).
+L.control.scale({ metric: true, imperial: false, maxWidth: 120, position: "bottomleft" }).addTo(map);
+
 const baseLayer = L.tileLayer(CONFIG.basemapUrl, {
   maxZoom: CONFIG.basemapMaxZoom,
   attribution: CONFIG.basemapAttribution,
