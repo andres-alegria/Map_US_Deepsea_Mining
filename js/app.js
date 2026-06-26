@@ -63,7 +63,7 @@ const CONFIG = {
   ovFillOpacity: 0.55,
   ovOutline:     "#530E0D",    // Mongabay Red dark
   ovWeight:      0.6,
-  ovLabel:       "US–ISA overlap",
+  ovLabel:       "Overlapping areas",
 
   /* ---- LAYER VISIBILITY ON LOAD ----------------------------------------- */
   cczVisibleOnLoad: true,
@@ -121,9 +121,10 @@ const CONFIG = {
   // Heading is null — the coloured company label carries the identity instead.
   usPopupHeadingField: null,
   usPopupFields: [
-    { field: "docket",        label: "Docket / licence" },
-    { field: "area_label",    label: "Reported area" },
-    { field: "overlaps_with", label: "Overlaps with" }
+    { field: "subarea",          label: "Block" },
+    { field: "docket",           label: "Docket / licence" },
+    { field: "overlaps_with",    label: "ISA overlapping areas" },
+    { field: "us_overlaps_with", label: "US overlapping areas" }
   ],
   // Text shown in the coloured label of every US popup.
   usLabelText: "US exploration area",
@@ -289,7 +290,7 @@ const ovLayer = L.geoJSON(null, {
     if (p.company) rows += `<tr><td class="k">US area</td><td>${esc(p.company)}</td></tr>`;
     if (p.overlaps_with) rows += `<tr><td class="k">ISA areas</td><td>${esc(p.overlaps_with)}</td></tr>`;
     layer.bindPopup(
-      `<div class="popup"><h3>US–ISA overlap</h3>` +
+      `<div class="popup"><h3>Overlapping areas</h3>` +
       `<span class="st" style="background:${CONFIG.ovOutline}">${esc(CONFIG.ovLabel)}</span>` +
       `<table>${rows}</table></div>`, { maxWidth: 300 });
   }
