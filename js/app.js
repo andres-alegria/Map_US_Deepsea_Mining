@@ -32,10 +32,12 @@ const CONFIG = {
   // all on-brand. Red is reserved for the US–ISA overlap (threat), so it is not
   // used here. Mid shades chosen for contrast over the neutral ISA fill.
   usColors: {
-    "American Deep Sea Minerals": "#E8A643",  // Orange mid
-    "The Metals Company USA":     "#C7859B",  // Purple mid
+    "The Metals Company":         "#C7859B",  // Purple mid
     "American Metal Resources":   "#74ADB3",  // Blue mid
     "SeaX":                       "#C9D04D",  // Green mid
+    "American Ocean Minerals":    "#2F8E7F",  // Jade — new applicant (adjust hue here)
+    "American Deep Sea Minerals": "#E8A643",  // Orange mid
+    "Impossible Metals":          "#6E3254",  // Plum — ISA application (via Bahrain)
     "Lockheed Martin":            "#F6E779"   // Yellow mid
   },
   usField:        "company",   // property that drives fill colour + legend
@@ -73,13 +75,6 @@ const CONFIG = {
   uuWeight:      0.6,
   uuLabel:       "Overlap between applicants",
 
-  /* ---- IMPOSSIBLE METALS (BAHRAIN) — ISA application --------------------- */
-  imbFill:        "#6e3254",   // Impossible Metals (custom plum)
-  imbFillOpacity: 0.50,
-  imbOutline:     "#3d1a2e",   // darker shade of the fill
-  imbWeight:      1.0,
-  imbLabel:       "Impossible Metals (ISA application)",
-
   /* ---- LAYER VISIBILITY ON LOAD ----------------------------------------- */
   cczVisibleOnLoad: true,
   isaVisibleOnLoad: true,
@@ -87,7 +82,6 @@ const CONFIG = {
   eezVisibleOnLoad: true,
   ovVisibleOnLoad:  false,   // US–ISA overlap-only layer starts off
   uuVisibleOnLoad:  false,   // US–US overlap-only layer starts off
-  imbVisibleOnLoad: true,
 
   /* ---- BASEMAP (subtle GEBCO / ocean shaded relief) ---------------------- */
   // Esri Ocean Basemap = GEBCO-derived bathymetric shaded relief, free, no key.
@@ -134,7 +128,6 @@ const CONFIG = {
   ovPath:  "data/overlaps.geojson",
   uuPath:  "data/us_overlaps.geojson",
   cczPath: "data/ccz.geojson",
-  imbPath: "data/imb_areas.geojson",
   resPath: "data/reserve_areas.geojson",
 
   // ---- PARALLEL POPUP FIELDS (US and ISA use the same labels for the same
@@ -146,6 +139,7 @@ const CONFIG = {
   // Coloured label shows the Operator (company); table starts with Area/block.
   usPopupFields: [
     { field: "subarea",          label: "Area / block" },
+    { field: "area_size",        label: "Area size" },
     { field: "docket",           label: "Docket / licence" },
     { field: "overlaps_with_named", label: "ISA overlapping areas" },
     { field: "us_overlaps_with", label: "US overlapping areas" }
@@ -232,7 +226,6 @@ map.getPane("eezPane").style.pointerEvents = "none";
 // always render greyscale, even if the server ignores the inline SLD override.
 map.getPane("eezPane").style.filter = "grayscale(1) contrast(0.85)";
 map.createPane("usPane");    map.getPane("usPane").style.zIndex = 430;
-map.createPane("imbPane");   map.getPane("imbPane").style.zIndex = 435;
 map.createPane("ovPane");    map.getPane("ovPane").style.zIndex = 440;
 map.createPane("uuPane");    map.getPane("uuPane").style.zIndex = 445;
 
@@ -377,30 +370,6 @@ const uuLayer = L.geoJSON(null, {
   }
 });
 
-/* ---- IMPOSSIBLE METALS (BAHRAIN) — ISA application --------------------- */
-const imbLayer = L.geoJSON(null, {
-  pane: "imbPane",
-  style: {
-    fillColor:   CONFIG.imbFill,
-    fillOpacity: CONFIG.imbFillOpacity,
-    color:       CONFIG.imbOutline,
-    weight:      CONFIG.imbWeight,
-    opacity:     1
-  },
-  onEachFeature: (f, layer) => {
-    const p = f.properties || {};
-    let rows = "";
-    if (p.subarea) rows += `<tr><td class="k">Block</td><td>${esc(p.subarea)}</td></tr>`;
-    rows += `<tr><td class="k">Authority</td><td>ISA (CCZ reserved areas)</td></tr>`;
-    if (p.approx === "yes")
-      rows += `<tr><td class="k">Note</td><td>approximate outline</td></tr>`;
-    layer.bindPopup(
-      `<div class="popup"><h3>Impossible Metals (Bahrain)</h3>` +
-      `<span class="st" style="background:${CONFIG.imbOutline}">ISA application</span>` +
-      `<table>${rows}</table></div>`, { maxWidth: 300 });
-  }
-});
-
 /* ---- EEZ LAYER (Marine Regions WMS tiles) ------------------------------ */
 // Server-rendered tiles, so all boundaries show at every zoom level — no
 // feature cap and no per-view refetching. An inline SLD forces every EEZ line
@@ -438,23 +407,20 @@ Promise.all([
   fetch(CONFIG.usPath).then(r => r.json()),
   fetch(CONFIG.ovPath).then(r => r.json()).catch(() => null),
   fetch(CONFIG.cczPath).then(r => r.json()).catch(() => null),
-  fetch(CONFIG.imbPath).then(r => r.json()).catch(() => null),
   fetch(CONFIG.resPath).then(r => r.json()).catch(() => null),
   fetch(CONFIG.uuPath).then(r => r.json()).catch(() => null)
-]).then(([isaGeo, usGeo, ovGeo, cczGeo, imbGeo, resGeo, uuGeo]) => {
+]).then(([isaGeo, usGeo, ovGeo, cczGeo, resGeo, uuGeo]) => {
   if (cczGeo) cczLayer.addData(cczGeo);
   if (resGeo) resLayer.addData(resGeo);
   isaLayer.addData(isaGeo);
   usLayer.addData(usGeo);
   if (ovGeo)  ovLayer.addData(ovGeo);
   if (uuGeo)  uuLayer.addData(uuGeo);
-  if (imbGeo) imbLayer.addData(imbGeo);
 
   if (CONFIG.cczVisibleOnLoad && cczGeo) cczLayer.addTo(map);
   if (CONFIG.resVisibleOnLoad && resGeo) resLayer.addTo(map);
   if (CONFIG.isaVisibleOnLoad) isaLayer.addTo(map);
   if (CONFIG.usVisibleOnLoad)  usLayer.addTo(map);
-  if (CONFIG.imbVisibleOnLoad && imbGeo) imbLayer.addTo(map);
   if (CONFIG.ovVisibleOnLoad)  ovLayer.addTo(map);
   if (CONFIG.uuVisibleOnLoad)  uuLayer.addTo(map);
   if (CONFIG.eezVisibleOnLoad) eezLayer.addTo(map);
@@ -481,12 +447,7 @@ function buildToggles() {
     { id: "tg-us",  label: "US application areas",  on: CONFIG.usVisibleOnLoad,
       onChange: v => v ? usLayer.addTo(map)  : map.removeLayer(usLayer) },
     { id: "tg-isa", label: "ISA exploration areas", on: CONFIG.isaVisibleOnLoad,
-      // Controls both legend items in this group together:
-      // "Approved ISA exploration areas" (isaLayer) + "Impossible Metals (in process)" (imbLayer).
-      onChange: v => {
-        if (v) { isaLayer.addTo(map); imbLayer.addTo(map); }
-        else   { map.removeLayer(isaLayer); map.removeLayer(imbLayer); }
-      } },
+      onChange: v => v ? isaLayer.addTo(map) : map.removeLayer(isaLayer) },
     { id: "tg-res", label: "ISA reserve areas", on: CONFIG.resVisibleOnLoad,
       onChange: v => v ? resLayer.addTo(map) : map.removeLayer(resLayer) },
     { id: "tg-ov",  label: "Overlap with ISA areas", on: CONFIG.ovVisibleOnLoad,
@@ -519,7 +480,10 @@ function legendFill(parent, color, opacity, border, label) {
 }
 
 // Display label override for US companies (e.g. mark approved licences).
-const usLegendLabels = { "Lockheed Martin": "Lockheed Martin (approved)" };
+const usLegendLabels = {
+  "Lockheed Martin":   "Lockheed Martin (approved licence)",
+  "Impossible Metals": "Impossible Metals (ISA application)"
+};
 
 function buildLegends(usGeo) {
   /* --- Block 1: US application areas (by company) --- */
@@ -535,9 +499,6 @@ function buildLegends(usGeo) {
   /* --- Block 2: ISA exploration areas --- */
   const isaEl = document.getElementById("isaLegend");
   isaEl.innerHTML = "";
-  // Impossible Metals (in process)
-  legendFill(isaEl, CONFIG.imbFill, CONFIG.imbFillOpacity + 0.3, CONFIG.imbOutline,
-             "Impossible Metals (in process)");
   // Approved ISA exploration areas (the ISA contractor areas)
   legendFill(isaEl, CONFIG.isaFill, CONFIG.isaFillOpacity + 0.3, CONFIG.isaOutline,
              "Approved ISA exploration areas");
