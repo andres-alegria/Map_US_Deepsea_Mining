@@ -141,7 +141,8 @@ const CONFIG = {
     { field: "subarea",          label: "Area / block" },
     { field: "area_size",        label: "Area size" },
     { field: "docket",           label: "Docket / licence" },
-    { field: "overlaps_with_named", label: "ISA overlapping areas" },
+    { field: "overlaps_with_named", label: "ISA exploration overlap" },
+    { field: "reserved_overlap", label: "ISA reserved-area overlap" },
     { field: "us_overlaps_with", label: "US overlapping areas" }
   ],
   // ISA popup: coloured label shows the Operator (holder), mirroring US.
