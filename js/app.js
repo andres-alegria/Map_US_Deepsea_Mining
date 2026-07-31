@@ -143,6 +143,7 @@ const CONFIG = {
     { field: "docket",           label: "Docket / licence" },
     { field: "overlaps_with_named", label: "ISA exploration overlap" },
     { field: "reserved_overlap", label: "ISA reserved-area overlap" },
+    { field: "apei_overlap",     label: "ISA protected-area overlap (APEI)" },
     { field: "us_overlaps_with", label: "US overlapping areas" }
   ],
   // ISA popup: coloured label shows the Operator (holder), mirroring US.
@@ -166,7 +167,17 @@ const CONFIG = {
   resOutline:     "#5F5E5A",   // Mongabay gray dark
   resWeight:      0.5,
   resLabel:       "ISA reserve areas",
-  resVisibleOnLoad: false
+  resVisibleOnLoad: false,
+
+  /* ---- ISA APEIs (Areas of Particular Environmental Interest — protected) - */
+  apeiFill:        "#3E6B45",   // Mongabay protected green (adjust here)
+  apeiFillOpacity: 0.14,
+  apeiOutline:     "#3E6B45",
+  apeiWeight:      1.0,
+  apeiDash:        "5,3",
+  apeiLabel:       "ISA protected areas (APEIs)",
+  apeiPath:        "data/apei_areas.geojson",
+  apeiVisibleOnLoad: false
 };
 
 /* ============================================================================
@@ -219,6 +230,7 @@ if (CONFIG.labelsUrl) {
 
 /* ---- PANES (stacking: CCZ below, ISA, EEZ, US, overlap on top) ---------- */
 map.createPane("cczPane");   map.getPane("cczPane").style.zIndex = 405;
+map.createPane("apeiPane");  map.getPane("apeiPane").style.zIndex = 406;
 map.createPane("resPane");   map.getPane("resPane").style.zIndex = 408;
 map.createPane("isaPane");   map.getPane("isaPane").style.zIndex = 410;
 map.createPane("eezPane");   map.getPane("eezPane").style.zIndex = 420;
@@ -243,6 +255,30 @@ const cczLayer = L.geoJSON(null, {
     weight:      CONFIG.cczWeight,
     dashArray:   CONFIG.cczDash,
     opacity:     0.9
+  }
+});
+
+/* ---- ISA APEI LAYER (Areas of Particular Environmental Interest) -------- */
+const apeiLayer = L.geoJSON(null, {
+  pane: "apeiPane",
+  style: {
+    fillColor:   CONFIG.apeiFill,
+    fillOpacity: CONFIG.apeiFillOpacity,
+    color:       CONFIG.apeiOutline,
+    weight:      CONFIG.apeiWeight,
+    dashArray:   CONFIG.apeiDash,
+    opacity:     0.9
+  },
+  onEachFeature: (f, layer) => {
+    const p = f.properties || {};
+    let rows = "";
+    if (p.apei) rows += `<tr><td class="k">Area</td><td>${esc(p.apei)}</td></tr>`;
+    rows += `<tr><td class="k">Authority</td><td>ISA — no-mining conservation zone</td></tr>`;
+    if (p.area_km2) rows += `<tr><td class="k">Size</td><td>${esc(Number(p.area_km2).toLocaleString())} km²</td></tr>`;
+    layer.bindPopup(
+      `<div class="popup"><h3>ISA protected area (APEI)</h3>` +
+      `<span class="st" style="background:${CONFIG.apeiOutline}">Protected — no mining</span>` +
+      `<table>${rows}</table></div>`, { maxWidth: 300 });
   }
 });
 
@@ -320,7 +356,7 @@ const usLayer = L.geoJSON(null, {
       rows += `<tr><td class="k">${esc(fld.label)}</td><td>${esc(val)}</td></tr>`;
     });
     layer.bindPopup(
-      `<div class="popup"><h3>${esc(CONFIG.usLabelText)}</h3>` +
+      `<div class="popup"><h3>${esc(p.heading || CONFIG.usLabelText)}</h3>` +
       `<span class="st" style="background:${color}">${esc(company)}</span>` +
       `<table>${rows}</table></div>`, { maxWidth: 320 });
   }
@@ -409,9 +445,11 @@ Promise.all([
   fetch(CONFIG.ovPath).then(r => r.json()).catch(() => null),
   fetch(CONFIG.cczPath).then(r => r.json()).catch(() => null),
   fetch(CONFIG.resPath).then(r => r.json()).catch(() => null),
-  fetch(CONFIG.uuPath).then(r => r.json()).catch(() => null)
-]).then(([isaGeo, usGeo, ovGeo, cczGeo, resGeo, uuGeo]) => {
+  fetch(CONFIG.uuPath).then(r => r.json()).catch(() => null),
+  fetch(CONFIG.apeiPath).then(r => r.json()).catch(() => null)
+]).then(([isaGeo, usGeo, ovGeo, cczGeo, resGeo, uuGeo, apeiGeo]) => {
   if (cczGeo) cczLayer.addData(cczGeo);
+  if (apeiGeo) apeiLayer.addData(apeiGeo);
   if (resGeo) resLayer.addData(resGeo);
   isaLayer.addData(isaGeo);
   usLayer.addData(usGeo);
@@ -419,6 +457,7 @@ Promise.all([
   if (uuGeo)  uuLayer.addData(uuGeo);
 
   if (CONFIG.cczVisibleOnLoad && cczGeo) cczLayer.addTo(map);
+  if (CONFIG.apeiVisibleOnLoad && apeiGeo) apeiLayer.addTo(map);
   if (CONFIG.resVisibleOnLoad && resGeo) resLayer.addTo(map);
   if (CONFIG.isaVisibleOnLoad) isaLayer.addTo(map);
   if (CONFIG.usVisibleOnLoad)  usLayer.addTo(map);
@@ -451,6 +490,8 @@ function buildToggles() {
       onChange: v => v ? isaLayer.addTo(map) : map.removeLayer(isaLayer) },
     { id: "tg-res", label: "ISA reserve areas", on: CONFIG.resVisibleOnLoad,
       onChange: v => v ? resLayer.addTo(map) : map.removeLayer(resLayer) },
+    { id: "tg-apei", label: "ISA protected areas (APEIs)", on: CONFIG.apeiVisibleOnLoad,
+      onChange: v => v ? apeiLayer.addTo(map) : map.removeLayer(apeiLayer) },
     { id: "tg-ov",  label: "Overlap with ISA areas", on: CONFIG.ovVisibleOnLoad,
       onChange: v => v ? ovLayer.addTo(map)  : map.removeLayer(ovLayer) },
     { id: "tg-uu",  label: "Overlap between applicants", on: CONFIG.uuVisibleOnLoad,
@@ -529,6 +570,9 @@ function buildLegends(usGeo) {
   // ISA reserve areas
   legendFill(otherEl, CONFIG.resFill, CONFIG.resFillOpacity + 0.3, CONFIG.resOutline,
              CONFIG.resLabel);
+  // ISA protected areas (APEIs)
+  legendFill(otherEl, CONFIG.apeiFill, CONFIG.apeiFillOpacity + 0.35, CONFIG.apeiOutline,
+             CONFIG.apeiLabel);
   // Overlapping areas (both overlap toggles share this colour)
   legendFill(otherEl, CONFIG.ovFill, CONFIG.ovFillOpacity + 0.25, CONFIG.ovOutline,
              "Overlapping areas");
